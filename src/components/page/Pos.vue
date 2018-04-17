@@ -10,15 +10,18 @@
               <el-table-column prop="price" label="金额"></el-table-column>
               <el-table-column  label="操作">
                 <template slot-scope="scope">
-                  <el-button type="text" size="small">删除</el-button>
-                  <el-button type="text" size="small">增加</el-button>
+                  <el-button type="text" size="small" @click="delSingleGoods(scope.row)">删除</el-button>
+                  <el-button type="text" size="small" @click="addOrderList(scope.row)">增加</el-button>
                 </template>
               </el-table-column>
             </el-table>
+            <div class="total-div">
+              <small>数量：</small>{{totalCount}} &nbsp;&nbsp;&nbsp;<small>金额：</small>{{totalMoney}} 元
+            </div>
             <div class="div-btn">
               <el-button type="warning">挂单</el-button>
-              <el-button type="danger">删除</el-button>
-              <el-button type="success">结账</el-button>
+              <el-button type="danger" @click="delAllGoods">删除</el-button>
+              <el-button type="success" @click="checkout">结账</el-button>
             </div>
           </el-tab-pane>
           <el-tab-pane label="挂单">
@@ -34,7 +37,7 @@
           <div class="title">常用商品</div>
           <div class="often-goods-list">
             <ul>
-              <li v-for="(goods,index) in oftenGoods" :key="index">
+              <li v-for="(goods,index) in oftenGoods" :key="index" @click="addOrderList(goods)">
                 <span>{{goods.goodsName}}</span>
                 <span class="o-price">￥{{goods.price}}</span>
               </li>
@@ -46,7 +49,7 @@
             <el-tab-pane label="汉堡">
               <div>
                 <ul class='cookList'>
-                    <li v-for="(goods,index) in type0Goods" :key="index">
+                    <li v-for="(goods,index) in type0Goods" :key="index" @click="addOrderList(goods)">
                         <span class="foodImg"><img :src="goods.goodsImg" width="100%"></span>
                         <div class="detail-div">
                           <span class="foodName">{{goods.goodsName}}</span>
@@ -56,9 +59,45 @@
                 </ul>
               </div>
             </el-tab-pane>
-            <el-tab-pane label="小食">小食</el-tab-pane>
-            <el-tab-pane label="饮料">饮料</el-tab-pane>
-            <el-tab-pane label="套餐">套餐</el-tab-pane>
+            <el-tab-pane label="小食">
+              <div>
+                <ul class='cookList'>
+                    <li v-for="(goods,index) in type1Goods" :key="index" @click="addOrderList(goods)">
+                        <span class="foodImg"><img :src="goods.goodsImg" width="100%"></span>
+                        <div class="detail-div">
+                          <span class="foodName">{{goods.goodsName}}</span>
+                          <span class="foodPrice">￥{{goods.price}}元</span>
+                        </div>
+                    </li>
+                </ul>
+              </div>
+            </el-tab-pane>
+            <el-tab-pane label="饮料">
+              <div>
+                <ul class='cookList'>
+                    <li v-for="(goods,index) in type2Goods" :key="index" @click="addOrderList(goods)">
+                        <span class="foodImg"><img :src="goods.goodsImg" width="100%"></span>
+                        <div class="detail-div">
+                          <span class="foodName">{{goods.goodsName}}</span>
+                          <span class="foodPrice">￥{{goods.price}}元</span>
+                        </div>
+                    </li>
+                </ul>
+              </div>
+            </el-tab-pane>
+            <el-tab-pane label="套餐">
+              <div>
+                <ul class='cookList'>
+                    <li v-for="(goods,index) in type3Goods" :key="index" @click="addOrderList(goods)">
+                        <span class="foodImg"><img :src="goods.goodsImg" width="100%"></span>
+                        <div class="detail-div">
+                          <span class="foodName">{{goods.goodsName}}</span>
+                          <span class="foodPrice">￥{{goods.price}}元</span>
+                        </div>
+                    </li>
+                </ul>
+              </div>
+            </el-tab-pane>
           </el-tabs>
         </div>
       </el-col>
@@ -68,177 +107,169 @@
 </template>
 
 <script>
+import axios from "axios";
 export default {
-  name: 'Pos',
-  data () {
+  name: "Pos",
+  data() {
     return {
-      tableData: [{
-        goodsName: '可口可乐',
-        price: 8,
-        count: 1
-      },{
-        goodsName: '香辣鸡腿堡',
-        price: 15,
-        count: 1
-      },{
-        goodsName: '爱心薯条',
-        price: 8,
-        count: 1
-      },{
-        goodsName: '甜筒',
-        price: 8,
-        count: 1
-      }],
-      oftenGoods:[
-        {
-              goodsId:1,
-              goodsName:'香辣鸡腿堡',
-              price:18
-          }, {
-              goodsId:2,
-              goodsName:'田园鸡腿堡',
-              price:15
-          }, {
-              goodsId:3,
-              goodsName:'和风汉堡',
-              price:15
-          }, {
-              goodsId:4,
-              goodsName:'快乐全家桶',
-              price:80
-          }, {
-              goodsId:5,
-              goodsName:'脆皮炸鸡腿',
-              price:10
-          }, {
-              goodsId:6,
-              goodsName:'魔法鸡块',
-              price:20
-          }, {
-              goodsId:7,
-              goodsName:'可乐大杯',
-              price:10
-          }, {
-              goodsId:8,
-              goodsName:'雪顶咖啡',
-              price:18
-          }, {
-              goodsId:9,
-              goodsName:'大块鸡米花',
-              price:15
-          }, {
-              goodsId:20,
-              goodsName:'香脆鸡柳',
-              price:17
-          }
-      ],
-      type0Goods:[
-          {
-              goodsId:1,
-              goodsImg:"http://7xjyw1.com1.z0.glb.clouddn.com/pos001.jpg",
-              goodsName:'香辣鸡腿堡',
-              price:18
-          }, {
-              goodsId:2,
-              goodsImg:"http://7xjyw1.com1.z0.glb.clouddn.com/pos002.jpg",
-              goodsName:'田园鸡腿堡',
-              price:15
-          }, {
-              goodsId:3,
-              goodsImg:"http://7xjyw1.com1.z0.glb.clouddn.com/pos004.jpg",
-              goodsName:'和风汉堡',
-              price:15
-          }, {
-              goodsId:4,
-               goodsImg:"http://7xjyw1.com1.z0.glb.clouddn.com/pos003.jpg",
-              goodsName:'快乐全家桶',
-              price:80
-          }, {
-              goodsId:5,
-               goodsImg:"http://7xjyw1.com1.z0.glb.clouddn.com/pos003.jpg",
-              goodsName:'脆皮炸鸡腿',
-              price:10
-          }, {
-              goodsId:6,
-               goodsImg:"http://7xjyw1.com1.z0.glb.clouddn.com/pos004.jpg",
-              goodsName:'魔法鸡块',
-              price:20
-          }, {
-              goodsId:7,
-               goodsImg:"http://7xjyw1.com1.z0.glb.clouddn.com/pos001.jpg",
-              goodsName:'可乐大杯',
-              price:10
-          }, {
-              goodsId:8,
-               goodsImg:"http://7xjyw1.com1.z0.glb.clouddn.com/pos003.jpg",
-              goodsName:'雪顶咖啡',
-              price:18
-          }, {
-              goodsId:9,
-               goodsImg:"http://7xjyw1.com1.z0.glb.clouddn.com/pos002.jpg",
-              goodsName:'大块鸡米花',
-              price:15
-          }, {
-              goodsId:20,
-               goodsImg:"http://7xjyw1.com1.z0.glb.clouddn.com/pos002.jpg",
-              goodsName:'香脆鸡柳',
-              price:17
-          }        
-      ],
-      
+      tableData: [],
+      oftenGoods: [],
+      type0Goods: [],
+      type1Goods: [],
+      type2Goods: [],
+      type3Goods: [],
+      totalMoney: 0,
+      totalCount: 0
+    };
+  },
+  created() {
+    axios
+      .get("http://jspang.com/DemoApi/oftenGoods.php")
+      .then(response => {
+        // console.log(response);
+        this.oftenGoods = response.data;
+      })
+      .catch(error => {
+        // console.log(error);
+        this.$message.error("网络错误，不能访问");
+      });
+
+    axios
+      .get("http://jspang.com/DemoApi/typeGoods.php")
+      .then(response => {
+        // console.log(response);
+        this.type0Goods = response.data[0];
+        this.type1Goods = response.data[1];
+        this.type2Goods = response.data[2];
+        this.type3Goods = response.data[3];
+      })
+      .catch(error => {
+        // console.log(error);
+        this.$message.error("网络错误，不能访问");
+      });
+  },
+  methods: {
+    addOrderList(goods) {
+      this.totalMoney = 0;
+      this.totalCount = 0;
+      let isHave = false;
+      for (let i = 0; i < this.tableData.length; i++) {
+        if (this.tableData[i].goodsId == goods.goodsId) {
+          isHave = true;
+        }
+      }
+      if (isHave) {
+        let arr = this.tableData.filter(o => o.goodsId == goods.goodsId);
+        // console.log(arr);
+        arr[0].count++;
+      } else {
+        let newGoods = {
+          goodsId: goods.goodsId,
+          goodsName: goods.goodsName,
+          price: goods.price,
+          count: 1
+        };
+        this.tableData.push(newGoods);
+      }
+      this.getAllMoney();
+    },
+
+    // 删除单个商品
+    delSingleGoods(goods) {
+      this.tableData = this.tableData.filter(o => o.goodsId != goods.goodsId);
+      this.getAllMoney();
+    },
+
+    // 删除所有商品
+    delAllGoods() {
+      this.tableData = [];
+      this.totalMoney = 0;
+      this.totalCount = 0;
+    },
+
+    // 数量和金额
+    getAllMoney() {
+      this.totalMoney = 0;
+      this.totalCount = 0;
+      if (this.tableData) {
+        // 计算金额和数量
+        this.tableData.forEach(element => {
+          // console.log(element);
+          this.totalCount += element.count;
+          this.totalMoney = this.totalMoney + element.price * element.count;
+        });
+      }
+    },
+
+    // 模拟结账
+    checkout() {
+      if (this.totalCount != 0) {
+        this.tableData = [];
+        this.totalMoney = 0;
+        this.totalCount = 0;
+        this.$message({
+          message:'结账成功，感谢您又为该店出了一份力',
+          type:'success'
+        });
+      } else {
+        this.$message.error('不能空结，老板了解您急切的心情！');
+      }
     }
   }
-}
+};
 </script>
 
 
 <style scoped>
-.right-div{
+.right-div {
   background-color: #f7f7f7;
+  padding-bottom: 30px;
 }
-.pos-order{
+.pos-order {
   border-right: 1px solid #c0ccda;
 }
-.div-btn{
+.div-btn {
   margin-top: 10px;
 }
-.title{
+.title {
   height: 20px;
   border-bottom: 1px solid #d3dce6;
   background-color: #f9fafc;
   padding: 10px;
   text-align: left;
 }
-.often-goods-list ul{
+.often-goods-list ul {
   display: flex;
   flex-wrap: wrap;
 }
-.often-goods-list ul li{
+.often-goods-list ul li {
   list-style: none;
   border-block-end: 1px solid #e5e9f2;
   padding: 10px;
   margin: 10px;
   background-color: #fff;
+  cursor: pointer;
 }
-.o-price{
+.o-price {
   color: #5887ff;
 }
-.cookList{
+.cookList {
   display: flex;
   flex-wrap: wrap;
   -webkit-margin-before: 0;
   -webkit-margin-after: 0;
 }
-.cookList li{
+.cookList li {
   list-style: none;
-  border:1px solid #E5E9F2;
+  border: 1px solid #e5e9f2;
   overflow: hidden;
-  background-color:#fff;
+  background-color: #fff;
   padding: 2px;
   margin: 2px;
   display: flex;
+  cursor: pointer;
 }
-.cookList .detail-div{
+.cookList .detail-div {
   display: flex;
   flex-direction: column;
   padding-left: 10px;
@@ -246,16 +277,20 @@ export default {
   justify-content: center;
   align-items: flex-start;
 }
-.foodImg{
+.foodImg {
   width: 60px;
 }
-.foodName{
-  font-size: 18px;
-  color:brown;
-}
-.foodPrice{
+.foodName {
   font-size: 16px;
-  padding-top:10px;
+  color: brown;
 }
-
+.foodPrice {
+  font-size: 16px;
+  padding-top: 10px;
+}
+.total-div {
+  background: #fff;
+  padding: 10px;
+  border-bottom: 1px solid #ebeef5;
+}
 </style>
